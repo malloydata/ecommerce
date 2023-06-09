@@ -310,3 +310,73 @@ source: cohorts is from(order_items -> {
         orders_this_month is sum(pick order_item_count when order_month = calendar_months.the_month else 0)
 })
 
+source: user_day_order_facts is from(
+  order_items -> {
+    group_by:
+      user_id
+      the_date is created_at.day
+
+    aggregate:
+      order_count is count()
+      num_cancelled_orders is count() { where: status = 'Cancelled' }
+      num_completed_orders is count() { where: status = 'Complete' }
+      num_returned_orders is count() { where: status = 'Returned' }
+      num_shipped_orders is count() { where: status = 'Shipped' }
+      num_processing_orders is count() { where: status = 'Processing' }
+      total_booking_amt is sum(sale_price) { where: status = 'Complete' | 'Shipped' | 'Processing' }
+      total_refund_amt is sum(sale_price) { where: status = 'Cancelled' | 'Returned' }
+  }
+)
+
+source: user_day_event_facts is from(
+  events -> {
+    group_by:
+      user_id
+      the_date is created_at.day
+    
+    aggregate:
+      event_count is count()
+      event_count_home is count() { where: event_type = 'Home' }
+      event_count_cart is count() { where: event_type = 'Cart' }
+      event_count_purchase is count() { where: event_type = 'Purchase' }
+      event_count_cancel is count() { where: event_type = 'Cancel' }
+  }
+)
+
+source: user_days is from(
+  users -> {
+    join_cross: calendar on created_at.day <= calendar.the_date.day
+    group_by:
+      user_id is id
+      the_date is calendar.the_date.day
+  }
+)
+
+source: user_day_facts is user_days + {
+  join_one: ef is user_day_event_facts 
+            on user_id = ef.user_id and the_date = ef.the_date
+  join_one: of is user_day_order_facts
+            on user_id = of.user_id and the_date = of.the_date
+
+  dimension:
+    is_active is pick 1 when ef.event_count + of.order_count > 0 else 0
+}
+
+query: user_day_facts -> {
+  group_by:
+    the_date
+
+  aggregate:
+    num_active is sum(is_active)
+    pct_active is sum(is_active) / count()
+
+  order_by:
+    the_date
+
+  limit: 1500
+}
+
+// TODOs:
+// - 7d active, 28d active
+// - Conversion rate
+// - Conversion rate per channel
