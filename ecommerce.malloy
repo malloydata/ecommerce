@@ -376,6 +376,18 @@ query: user_day_facts -> {
   limit: 1500
 }
 
+query: user_day_facts -> {
+  project: *
+  limit: 100
+}
+
+// When I run this query, it assumes none of the intermediate models
+// are materialized, and writes SQL to execute from the base table.
+//
+// If I add annotations to materialize a source, Malloy needs a way
+// to know that it doesn't need to execute the model from scratch again
+// and that it can use the materialized version.
+
 // TODOs:
 // - 7d active, 28d active
 // - Conversion rate
