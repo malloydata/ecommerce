@@ -1,6 +1,7 @@
--- connection: bigquery
--- import: "ecommerce.malloy"
+>>>malloy
+import "ecommerce.malloy"
 
+>>>sql connection:bigquery
 CREATE OR REPLACE VIEW ecommerce_views.dim_user_v AS 
 (%{
     user_order_facts -> { project: * }

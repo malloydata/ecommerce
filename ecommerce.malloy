@@ -362,7 +362,7 @@ source: user_day_facts is user_days + {
     is_active is pick 1 when ef.event_count + of.order_count > 0 else 0
 }
 
-query: user_day_facts -> {
+query: active_users_daily is user_day_facts -> {
   group_by:
     the_date
 
@@ -376,10 +376,16 @@ query: user_day_facts -> {
   limit: 1500
 }
 
-query: user_day_facts -> {
-  project: *
-  limit: 100
-}
+// Notes:
+
+// Can't do 7d active users
+// Need window functions or interval date math:
+
+// query: active_users_7d is user_day_facts + {
+//     join_cross: l7 is calendar on the_date <= l7.the_date and the_date > date_add(l7.the_date, interval -6 days)
+// } -> {
+//   group_by: l7.the_date
+// }
 
 // When I run this query, it assumes none of the intermediate models
 // are materialized, and writes SQL to execute from the base table.
@@ -387,8 +393,3 @@ query: user_day_facts -> {
 // If I add annotations to materialize a source, Malloy needs a way
 // to know that it doesn't need to execute the model from scratch again
 // and that it can use the materialized version.
-
-// TODOs:
-// - 7d active, 28d active
-// - Conversion rate
-// - Conversion rate per channel
