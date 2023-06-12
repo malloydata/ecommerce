@@ -362,19 +362,6 @@ source: user_day_facts is user_days + {
     is_active is pick 1 when ef.event_count + of.order_count > 0 else 0
 }
 
-query: active_users_daily is user_day_facts -> {
-  group_by:
-    the_date
-
-  aggregate:
-    num_active is sum(is_active)
-    pct_active is sum(is_active) / count()
-
-  order_by:
-    the_date
-
-  limit: 1500
-}
 
 // Notes:
 
