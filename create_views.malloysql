@@ -75,7 +75,7 @@ CREATE OR REPLACE VIEW ecommerce_views.cohorts_monthly_v AS
 }%
 ;
 
-CREATE OR REPLACE VIEW ecommerice_views.active_users_daily_v AS
+CREATE OR REPLACE VIEW ecommerce_views.active_users_daily_v AS
 %{
     user_day_facts -> {
         group_by:
