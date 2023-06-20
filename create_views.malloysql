@@ -77,7 +77,7 @@ CREATE OR REPLACE VIEW ecommerce_views.cohorts_monthly_v AS
 
 CREATE OR REPLACE VIEW ecommerice_views.active_users_daily_v AS
 %{
-    active_users_daily is user_day_facts -> {
+    user_day_facts -> {
         group_by:
             the_date
 
@@ -88,5 +88,5 @@ CREATE OR REPLACE VIEW ecommerice_views.active_users_daily_v AS
         order_by:
             the_date
         }
-%}
+}%
 ;
